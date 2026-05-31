@@ -241,7 +241,7 @@
       ctx.fillRect(0, 0, W, H);
     });
 
-    document.getElementById('btn-copy').addEventListener('click', () => {
+        document.getElementById('btn-copy').addEventListener('click', async () => {
       const tempCanvas = document.createElement('canvas');
       tempCanvas.width = W;
       tempCanvas.height = H;
@@ -249,16 +249,18 @@
       tCtx.fillStyle = '#fff';
       tCtx.fillRect(0, 0, W, H);
       tCtx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, W, H);
-      tempCanvas.toBlob(async (blob) => {
-        try {
-          await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-          const btn = document.getElementById('btn-copy');
-          btn.textContent = 'コピー済 ✅';
-          setTimeout(() => btn.textContent = 'コピー 📋', 2000);
-        } catch (err) {
-          alert('コピーできませんでした: ' + err.message);
-        }
-      });
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'image/png': new Promise(resolve => tempCanvas.toBlob(resolve))
+          })
+        ]);
+        const btn = document.getElementById('btn-copy');
+        btn.textContent = 'コピー済 ✅';
+        setTimeout(() => btn.textContent = 'コピー 📋', 2000);
+      } catch (err) {
+        alert('コピーできませんでした: ' + err.message);
+      }
     });
 
     document.getElementById('btn-send').addEventListener('click', async () => {
