@@ -6,7 +6,6 @@
   <title>ロイに聞く</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
       background: #f5f5f0;
@@ -16,15 +15,7 @@
       align-items: center;
       padding: 24px 16px;
     }
-
-    h1 {
-      font-size: 1.4rem;
-      font-weight: 600;
-      color: #222;
-      margin-bottom: 20px;
-      letter-spacing: 0.02em;
-    }
-
+    h1 { font-size: 1.4rem; font-weight: 600; color: #222; margin-bottom: 20px; letter-spacing: 0.02em; }
     #canvas-wrapper {
       position: relative;
       background: #fff;
@@ -32,125 +23,48 @@
       box-shadow: 0 2px 16px rgba(0,0,0,0.1);
       touch-action: none;
     }
-
-    canvas {
-      display: block;
-      border-radius: 16px;
-      cursor: crosshair;
-      touch-action: none;
-    }
-
-    #toolbar {
-      display: flex;
-      gap: 10px;
-      margin: 14px 0;
-      align-items: center;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    button {
-      padding: 8px 18px;
-      border: none;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: opacity 0.15s, transform 0.1s;
-    }
-
+    canvas { display: block; border-radius: 16px; cursor: crosshair; touch-action: none; }
+    #toolbar { display: flex; gap: 10px; margin: 14px 0; align-items: center; flex-wrap: wrap; justify-content: center; }
+    button { padding: 8px 18px; border: none; border-radius: 10px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: opacity 0.15s, transform 0.1s; }
     button:active { transform: scale(0.96); }
-
     #btn-pen    { background: #222; color: #fff; }
     #btn-eraser { background: #e0e0e0; color: #333; }
     #btn-clear  { background: #fde8e8; color: #c0392b; }
     #btn-copy   { background: #e8f4fd; color: #2980b9; }
     #btn-send   { background: #4f46e5; color: #fff; font-size: 1rem; padding: 10px 28px; }
-
     button.active { outline: 3px solid #4f46e5; outline-offset: 2px; }
-
     #comment-input {
-      width: min(600px, 90vw);
-      padding: 10px 14px;
-      border: 1.5px solid #d0d0d0;
-      border-radius: 10px;
-      font-size: 0.95rem;
-      background: #fff;
-      resize: none;
-      height: 60px;
-      margin-bottom: 8px;
+      width: min(600px, 90vw); padding: 10px 14px; border: 1.5px solid #d0d0d0;
+      border-radius: 10px; font-size: 0.95rem; background: #fff; resize: none; height: 60px; margin-bottom: 8px;
     }
-
     #comment-input:focus { outline: none; border-color: #4f46e5; }
-
     #response-area {
-      width: min(600px, 90vw);
-      margin-top: 20px;
-      background: #fff;
-      border-radius: 16px;
-      padding: 18px 20px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-      font-size: 0.95rem;
-      line-height: 1.7;
-      color: #333;
-      white-space: pre-wrap;
-      min-height: 60px;
-      display: none;
+      width: min(600px, 90vw); margin-top: 20px; background: #fff; border-radius: 16px;
+      padding: 18px 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); font-size: 0.95rem;
+      line-height: 1.7; color: #333; white-space: pre-wrap; min-height: 60px; display: none;
     }
-
     #response-area.visible { display: block; }
-
-    #response-label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #4f46e5;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    #loading {
-      display: none;
-      color: #888;
-      font-size: 0.9rem;
-      margin-top: 12px;
-    }
-
+    #response-label { font-size: 0.8rem; font-weight: 600; color: #4f46e5; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em; }
+    #loading { display: none; color: #888; font-size: 0.9rem; margin-top: 12px; }
     #loading.visible { display: block; }
-
-    .dot-anim::after {
-      content: '';
-      animation: dots 1.2s steps(4, end) infinite;
-    }
-
-    @keyframes dots {
-      0%   { content: ''; }
-      25%  { content: '.'; }
-      50%  { content: '..'; }
-      75%  { content: '...'; }
-    }
+    .dot-anim::after { content: ''; animation: dots 1.2s steps(4, end) infinite; }
+    @keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
   </style>
 </head>
 <body>
   <h1>ロイに聞く ✏️</h1>
-
   <div id="canvas-wrapper">
     <canvas id="canvas" width="600" height="400"></canvas>
   </div>
-
   <div id="toolbar">
     <button id="btn-pen" class="active">ペン</button>
     <button id="btn-eraser">消しゴム</button>
     <button id="btn-clear">全消し</button>
     <button id="btn-copy">コピー 📋</button>
   </div>
-
   <textarea id="comment-input" placeholder="コメントを追加（任意）"></textarea>
-
   <button id="btn-send">ロイに送る →</button>
-
   <div id="loading"><span class="dot-anim">ロイが考えています</span></div>
-
   <div id="response-area">
     <div id="response-label">ロイより</div>
     <div id="response-text"></div>
@@ -184,79 +98,79 @@
       return {
         x: (e.clientX - rect.left) * scaleX,
         y: (e.clientY - rect.top) * scaleY,
-        pressure: e.pressure || 0.5
+        pressure: (e.pressure > 0) ? e.pressure : 0.5
       };
     }
 
-        function startDraw(e) {
+    function applyStyle(pressure) {
+      if (mode === 'eraser') {
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 20;
+      } else {
+        ctx.strokeStyle = '#222';
+        ctx.lineWidth = Math.max(0.8, Math.min(4, pressure * 4));
+      }
+    }
+
+    function startDraw(e) {
       e.preventDefault();
       drawing = true;
       canvas.setPointerCapture(e.pointerId);
       const p = getPos(e);
       points = [p];
 
-      // 書き始めの点を即座に描く
-      if (mode !== 'eraser') {
-        const r = Math.max(0.5, Math.min(2, p.pressure * 2));
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
-        ctx.fillStyle = '#222';
-        ctx.fill();
-      }
+      // 書き始めに即座に点を描く
+      applyStyle(p.pressure);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, ctx.lineWidth / 2, 0, Math.PI * 2);
+      ctx.fillStyle = mode === 'eraser' ? '#fff' : '#222';
+      ctx.fill();
     }
 
-       function draw(e) {
+    function draw(e) {
       e.preventDefault();
       if (!drawing) return;
-      const p = getPos(e);
-      points.push(p);
 
-      const len = points.length;
+      // coalescedEvents があれば全部処理（iPadで精度向上）
+      const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
 
-      if (mode === 'eraser') {
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 20;
-      } else {
-        ctx.strokeStyle = '#222';
-        const pressure = points[len - 2]?.pressure || 0.5;
-        ctx.lineWidth = Math.max(0.5, Math.min(4, pressure * 4));
+      for (const ev of events) {
+        const p = getPos(ev);
+        points.push(p);
+        const len = points.length;
+
+        applyStyle(p.pressure);
+
+        if (len === 2) {
+          // 2点目は直線で即描く
+          ctx.beginPath();
+          ctx.moveTo(points[0].x, points[0].y);
+          ctx.lineTo(p.x, p.y);
+          ctx.stroke();
+        } else if (len >= 3) {
+          // 3点以上はベジェ曲線でなめらかに
+          const p0 = points[len - 3];
+          const p1 = points[len - 2];
+          const p2 = points[len - 1];
+          ctx.beginPath();
+          ctx.moveTo((p0.x + p1.x) / 2, (p0.y + p1.y) / 2);
+          ctx.quadraticCurveTo(p1.x, p1.y, (p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
+          ctx.stroke();
+        }
       }
-
-      if (len === 2) {
-        // 2点目は直線で即描く
-        ctx.beginPath();
-        ctx.moveTo(points[0].x, points[0].y);
-        ctx.lineTo(points[1].x, points[1].y);
-        ctx.stroke();
-        return;
-      }
-
-      // 3点以上はベジェ曲線
-      const p0 = points[len - 3];
-      const p1 = points[len - 2];
-      const p2 = points[len - 1];
-
-      ctx.beginPath();
-      ctx.moveTo((p0.x + p1.x) / 2, (p0.y + p1.y) / 2);
-      ctx.quadraticCurveTo(p1.x, p1.y, (p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
-      ctx.stroke();
     }
 
     function stopDraw(e) {
       if (!drawing) return;
       drawing = false;
-
-      // 最後の点を描き切る
+      // 最後の点まで描き切る
       if (points.length >= 2) {
         const p1 = points[points.length - 2];
         const p2 = points[points.length - 1];
+        applyStyle(p2.pressure);
         ctx.beginPath();
         ctx.moveTo(p1.x, p1.y);
         ctx.lineTo(p2.x, p2.y);
-        if (mode !== 'eraser') {
-          ctx.strokeStyle = '#222';
-          ctx.lineWidth = Math.max(0.5, Math.min(4, p2.pressure * 4));
-        }
         ctx.stroke();
       }
       points = [];
@@ -295,9 +209,7 @@
       tCtx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, W, H);
       try {
         await navigator.clipboard.write([
-          new ClipboardItem({
-            'image/png': new Promise(resolve => tempCanvas.toBlob(resolve))
-          })
+          new ClipboardItem({ 'image/png': new Promise(resolve => tempCanvas.toBlob(resolve)) })
         ]);
         const btn = document.getElementById('btn-copy');
         btn.textContent = 'コピー済 ✅';
@@ -315,9 +227,7 @@
       tCtx.fillStyle = '#fff';
       tCtx.fillRect(0, 0, W, H);
       tCtx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, W, H);
-      const dataURL = tempCanvas.toDataURL('image/png');
-      const base64 = dataURL.replace(/^data:image\/png;base64,/, '');
-
+      const base64 = tempCanvas.toDataURL('image/png').replace(/^data:image\/png;base64,/, '');
       const comment = document.getElementById('comment-input').value.trim();
 
       document.getElementById('loading').classList.add('visible');
