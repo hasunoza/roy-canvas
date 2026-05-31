@@ -170,52 +170,83 @@
 
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, W, H);
-    ctx.strokeStyle = '#222';
-    ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
     let drawing = false;
     let mode = 'pen';
-    let lastX = 0, lastY = 0;
+    let points = [];
 
     function getPos(e) {
       const rect = canvas.getBoundingClientRect();
       const scaleX = W / rect.width;
       const scaleY = H / rect.height;
-      return [
-        (e.clientX - rect.left) * scaleX,
-        (e.clientY - rect.top) * scaleY
-      ];
+      return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY,
+        pressure: e.pressure || 0.5
+      };
     }
 
     function startDraw(e) {
       e.preventDefault();
       drawing = true;
       canvas.setPointerCapture(e.pointerId);
-      [lastX, lastY] = getPos(e);
+      const p = getPos(e);
+      points = [p];
     }
 
     function draw(e) {
       e.preventDefault();
       if (!drawing) return;
-      const [x, y] = getPos(e);
+      const p = getPos(e);
+      points.push(p);
+
+      if (points.length < 3) return;
+
+      const len = points.length;
+      const p0 = points[len - 3];
+      const p1 = points[len - 2];
+      const p2 = points[len - 1];
+
+      // ベジェ曲線でなめらかに
+      const cpX = (p0.x + p2.x) / 2;
+      const cpY = (p0.y + p2.y) / 2;
+
       ctx.beginPath();
-      ctx.moveTo(lastX, lastY);
-      ctx.lineTo(x, y);
+      ctx.moveTo((p0.x + p1.x) / 2, (p0.y + p1.y) / 2);
+      ctx.quadraticCurveTo(p1.x, p1.y, (p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
+
       if (mode === 'eraser') {
         ctx.strokeStyle = '#fff';
         ctx.lineWidth = 20;
       } else {
         ctx.strokeStyle = '#222';
-        ctx.lineWidth = 2;
+        // 筆圧で太さを変える（0.5〜4px）
+        const pressure = p1.pressure > 0 ? p1.pressure : 0.5;
+        ctx.lineWidth = Math.max(0.5, Math.min(4, pressure * 4));
       }
       ctx.stroke();
-      [lastX, lastY] = [x, y];
     }
 
     function stopDraw(e) {
+      if (!drawing) return;
       drawing = false;
+
+      // 最後の点を描き切る
+      if (points.length >= 2) {
+        const p1 = points[points.length - 2];
+        const p2 = points[points.length - 1];
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        if (mode !== 'eraser') {
+          ctx.strokeStyle = '#222';
+          ctx.lineWidth = Math.max(0.5, Math.min(4, p2.pressure * 4));
+        }
+        ctx.stroke();
+      }
+      points = [];
     }
 
     canvas.addEventListener('pointerdown', startDraw);
@@ -241,7 +272,7 @@
       ctx.fillRect(0, 0, W, H);
     });
 
-        document.getElementById('btn-copy').addEventListener('click', async () => {
+    document.getElementById('btn-copy').addEventListener('click', async () => {
       const tempCanvas = document.createElement('canvas');
       tempCanvas.width = W;
       tempCanvas.height = H;
