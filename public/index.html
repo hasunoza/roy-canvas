@@ -6,23 +6,9 @@
   <title>ロイに聞く</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-      background: #f5f5f0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 24px 16px;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif; background: #f5f5f0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 16px; }
     h1 { font-size: 1.4rem; font-weight: 600; color: #222; margin-bottom: 20px; letter-spacing: 0.02em; }
-    #canvas-wrapper {
-      position: relative;
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.1);
-      touch-action: none;
-    }
+    #canvas-wrapper { position: relative; background: #fff; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.1); touch-action: none; }
     canvas { display: block; border-radius: 16px; cursor: crosshair; touch-action: none; }
     #toolbar { display: flex; gap: 10px; margin: 14px 0; align-items: center; flex-wrap: wrap; justify-content: center; }
     button { padding: 8px 18px; border: none; border-radius: 10px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: opacity 0.15s, transform 0.1s; }
@@ -33,16 +19,9 @@
     #btn-copy   { background: #e8f4fd; color: #2980b9; }
     #btn-send   { background: #4f46e5; color: #fff; font-size: 1rem; padding: 10px 28px; }
     button.active { outline: 3px solid #4f46e5; outline-offset: 2px; }
-    #comment-input {
-      width: min(800px, 90vw); padding: 10px 14px; border: 1.5px solid #d0d0d0;
-      border-radius: 10px; font-size: 0.95rem; background: #fff; resize: none; height: 60px; margin-bottom: 8px;
-    }
+    #comment-input { width: min(800px, 90vw); padding: 10px 14px; border: 1.5px solid #d0d0d0; border-radius: 10px; font-size: 0.95rem; background: #fff; resize: none; height: 60px; margin-bottom: 8px; }
     #comment-input:focus { outline: none; border-color: #4f46e5; }
-    #response-area {
-      width: min(800px, 90vw); margin-top: 20px; background: #fff; border-radius: 16px;
-      padding: 18px 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); font-size: 0.95rem;
-      line-height: 1.7; color: #333; white-space: pre-wrap; min-height: 60px; display: none;
-    }
+    #response-area { width: min(800px, 90vw); margin-top: 20px; background: #fff; border-radius: 16px; padding: 18px 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); font-size: 0.95rem; line-height: 1.7; color: #333; white-space: pre-wrap; min-height: 60px; display: none; }
     #response-area.visible { display: block; }
     #response-label { font-size: 0.8rem; font-weight: 600; color: #4f46e5; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em; }
     #loading { display: none; color: #888; font-size: 0.9rem; margin-top: 12px; }
@@ -91,7 +70,6 @@
     let drawing = false;
     let mode = 'pen';
     let lastX = 0, lastY = 0;
-    let startX = 0, startY = 0;
 
     function getPos(e) {
       const rect = canvas.getBoundingClientRect();
@@ -113,14 +91,11 @@
     }
 
     canvas.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'touch') return; // 手のひら無視
       drawing = true;
       const p = getPos(e);
       lastX = p.x;
       lastY = p.y;
-      startX = p.x;
-      startY = p.y;
-
-      // 書き始めの点
       applyStyle(p.pressure);
       ctx.beginPath();
       ctx.arc(p.x, p.y, ctx.lineWidth / 2, 0, Math.PI * 2);
@@ -129,6 +104,7 @@
     });
 
     canvas.addEventListener('pointermove', (e) => {
+      if (e.pointerType === 'touch') return; // 手のひら無視
       if (!drawing) return;
       const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
       for (const ev of events) {
@@ -144,9 +120,9 @@
     });
 
     canvas.addEventListener('pointerup', (e) => {
+      if (e.pointerType === 'touch') return; // 手のひら無視
       if (!drawing) return;
       const p = getPos(e);
-      // 短いストロークの終点まで確実に描く
       applyStyle(p.pressure);
       ctx.beginPath();
       ctx.moveTo(lastX, lastY);
@@ -156,13 +132,8 @@
     });
 
     canvas.addEventListener('pointerleave', (e) => {
+      if (e.pointerType === 'touch') return; // 手のひら無視
       if (!drawing) return;
-      const p = getPos(e);
-      applyStyle(p.pressure);
-      ctx.beginPath();
-      ctx.moveTo(lastX, lastY);
-      ctx.lineTo(p.x, p.y);
-      ctx.stroke();
       drawing = false;
     });
 
