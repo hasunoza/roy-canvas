@@ -113,7 +113,15 @@
       }
     }
 
-    function stopDraw() {
+        function stopDraw(e) {
+      if (drawing && e && e.clientX !== undefined) {
+        const p = getPos(e);
+        applyStyle(p.pressure || 0.5);
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+      }
       drawing = false;
       document.removeEventListener('pointermove', onMove);
       document.removeEventListener('pointerup', stopDraw);
