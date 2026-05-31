@@ -188,12 +188,21 @@
       };
     }
 
-    function startDraw(e) {
+        function startDraw(e) {
       e.preventDefault();
       drawing = true;
       canvas.setPointerCapture(e.pointerId);
       const p = getPos(e);
       points = [p];
+
+      // 書き始めの点を即座に描く
+      if (mode !== 'eraser') {
+        const r = Math.max(0.5, Math.min(2, p.pressure * 2));
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = '#222';
+        ctx.fill();
+      }
     }
 
     function draw(e) {
