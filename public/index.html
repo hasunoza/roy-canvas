@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>ロイに聞く</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,12 +34,12 @@
     #btn-send   { background: #4f46e5; color: #fff; font-size: 1rem; padding: 10px 28px; }
     button.active { outline: 3px solid #4f46e5; outline-offset: 2px; }
     #comment-input {
-      width: min(600px, 90vw); padding: 10px 14px; border: 1.5px solid #d0d0d0;
+      width: min(800px, 90vw); padding: 10px 14px; border: 1.5px solid #d0d0d0;
       border-radius: 10px; font-size: 0.95rem; background: #fff; resize: none; height: 60px; margin-bottom: 8px;
     }
     #comment-input:focus { outline: none; border-color: #4f46e5; }
     #response-area {
-      width: min(600px, 90vw); margin-top: 20px; background: #fff; border-radius: 16px;
+      width: min(800px, 90vw); margin-top: 20px; background: #fff; border-radius: 16px;
       padding: 18px 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); font-size: 0.95rem;
       line-height: 1.7; color: #333; white-space: pre-wrap; min-height: 60px; display: none;
     }
@@ -54,7 +54,7 @@
 <body>
   <h1>ロイに聞く ✏️</h1>
   <div id="canvas-wrapper">
-    <canvas id="canvas" width="600" height="400"></canvas>
+    <canvas id="canvas"></canvas>
   </div>
   <div id="toolbar">
     <button id="btn-pen" class="active">ペン</button>
@@ -74,7 +74,7 @@
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
 
-        const dpr = window.devicePixelRatio || 1;
+    const dpr = window.devicePixelRatio || 1;
     const W = Math.min(window.innerWidth - 32, 1200);
     const H = Math.round(W * 0.65);
     canvas.width = W * dpr;
@@ -90,7 +90,7 @@
 
     let drawing = false;
     let mode = 'pen';
-    let points = [];
+    let lastX = 0, lastY = 0;
 
     function getPos(e) {
       const rect = canvas.getBoundingClientRect();
@@ -99,14 +99,14 @@
       return {
         x: (e.clientX - rect.left) * scaleX,
         y: (e.clientY - rect.top) * scaleY,
-        pressure: (e.pressure > 0) ? e.pressure : 0.5
+        pressure: e.pressure > 0 ? e.pressure : 0.5
       };
     }
 
     function applyStyle(pressure) {
       if (mode === 'eraser') {
         ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 20;
+        ctx.lineWidth = 24;
       } else {
         ctx.strokeStyle = '#222';
         ctx.lineWidth = Math.max(0.8, Math.min(4, pressure * 4));
@@ -116,11 +116,10 @@
     function startDraw(e) {
       e.preventDefault();
       drawing = true;
-      canvas.setPointerCapture(e.pointerId);
       const p = getPos(e);
-      points = [p];
+      lastX = p.x;
+      lastY = p.y;
 
-      // 書き始めに即座に点を描く
       applyStyle(p.pressure);
       ctx.beginPath();
       ctx.arc(p.x, p.y, ctx.lineWidth / 2, 0, Math.PI * 2);
@@ -132,49 +131,21 @@
       e.preventDefault();
       if (!drawing) return;
 
-      // coalescedEvents があれば全部処理（iPadで精度向上）
       const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
-
       for (const ev of events) {
         const p = getPos(ev);
-        points.push(p);
-        const len = points.length;
-
         applyStyle(p.pressure);
-
-        if (len === 2) {
-          // 2点目は直線で即描く
-          ctx.beginPath();
-          ctx.moveTo(points[0].x, points[0].y);
-          ctx.lineTo(p.x, p.y);
-          ctx.stroke();
-        } else if (len >= 3) {
-          // 3点以上はベジェ曲線でなめらかに
-          const p0 = points[len - 3];
-          const p1 = points[len - 2];
-          const p2 = points[len - 1];
-          ctx.beginPath();
-          ctx.moveTo((p0.x + p1.x) / 2, (p0.y + p1.y) / 2);
-          ctx.quadraticCurveTo(p1.x, p1.y, (p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
-          ctx.stroke();
-        }
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+        lastX = p.x;
+        lastY = p.y;
       }
     }
 
     function stopDraw(e) {
-      if (!drawing) return;
       drawing = false;
-      // 最後の点まで描き切る
-      if (points.length >= 2) {
-        const p1 = points[points.length - 2];
-        const p2 = points[points.length - 1];
-        applyStyle(p2.pressure);
-        ctx.beginPath();
-        ctx.moveTo(p1.x, p1.y);
-        ctx.lineTo(p2.x, p2.y);
-        ctx.stroke();
-      }
-      points = [];
     }
 
     canvas.addEventListener('pointerdown', startDraw);
