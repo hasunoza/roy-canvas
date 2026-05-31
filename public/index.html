@@ -205,36 +205,40 @@
       }
     }
 
-    function draw(e) {
+       function draw(e) {
       e.preventDefault();
       if (!drawing) return;
       const p = getPos(e);
       points.push(p);
 
-      if (points.length < 3) return;
-
       const len = points.length;
-      const p0 = points[len - 3];
-      const p1 = points[len - 2];
-      const p2 = points[len - 1];
-
-      // ベジェ曲線でなめらかに
-      const cpX = (p0.x + p2.x) / 2;
-      const cpY = (p0.y + p2.y) / 2;
-
-      ctx.beginPath();
-      ctx.moveTo((p0.x + p1.x) / 2, (p0.y + p1.y) / 2);
-      ctx.quadraticCurveTo(p1.x, p1.y, (p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
 
       if (mode === 'eraser') {
         ctx.strokeStyle = '#fff';
         ctx.lineWidth = 20;
       } else {
         ctx.strokeStyle = '#222';
-        // 筆圧で太さを変える（0.5〜4px）
-        const pressure = p1.pressure > 0 ? p1.pressure : 0.5;
+        const pressure = points[len - 2]?.pressure || 0.5;
         ctx.lineWidth = Math.max(0.5, Math.min(4, pressure * 4));
       }
+
+      if (len === 2) {
+        // 2点目は直線で即描く
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        ctx.lineTo(points[1].x, points[1].y);
+        ctx.stroke();
+        return;
+      }
+
+      // 3点以上はベジェ曲線
+      const p0 = points[len - 3];
+      const p1 = points[len - 2];
+      const p2 = points[len - 1];
+
+      ctx.beginPath();
+      ctx.moveTo((p0.x + p1.x) / 2, (p0.y + p1.y) / 2);
+      ctx.quadraticCurveTo(p1.x, p1.y, (p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
       ctx.stroke();
     }
 
