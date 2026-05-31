@@ -113,24 +113,15 @@
       }
     }
 
-    function startDraw(e) {
-      e.preventDefault();
-      drawing = true;
-      const p = getPos(e);
-      lastX = p.x;
-      lastY = p.y;
-
-      applyStyle(p.pressure);
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, ctx.lineWidth / 2, 0, Math.PI * 2);
-      ctx.fillStyle = mode === 'eraser' ? '#fff' : '#222';
-      ctx.fill();
+    function stopDraw() {
+      drawing = false;
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', stopDraw);
+      document.removeEventListener('pointercancel', stopDraw);
     }
 
-    function draw(e) {
-      e.preventDefault();
+    function onMove(e) {
       if (!drawing) return;
-
       const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
       for (const ev of events) {
         const p = getPos(ev);
@@ -144,34 +135,27 @@
       }
     }
 
-    function stopDraw(e) {
-      drawing = false;
-    }
-
-        canvas.addEventListener('pointerdown', (e) => {
+    canvas.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       if (e.buttons === 0) return;
       drawing = true;
+
       const p = getPos(e);
       lastX = p.x;
       lastY = p.y;
+
+      // 書き始めの点を即座に描く
       applyStyle(p.pressure);
       ctx.beginPath();
       ctx.arc(p.x, p.y, ctx.lineWidth / 2, 0, Math.PI * 2);
       ctx.fillStyle = mode === 'eraser' ? '#fff' : '#222';
       ctx.fill();
 
-      document.addEventListener('pointermove', draw);
+      // ストローク中はdocumentで追跡
+      document.addEventListener('pointermove', onMove);
       document.addEventListener('pointerup', stopDraw);
       document.addEventListener('pointercancel', stopDraw);
     });
-
-    function stopDraw() {
-      drawing = false;
-      document.removeEventListener('pointermove', draw);
-      document.removeEventListener('pointerup', stopDraw);
-      document.removeEventListener('pointercancel', stopDraw);
-    }
 
     document.getElementById('btn-pen').addEventListener('click', () => {
       mode = 'pen';
